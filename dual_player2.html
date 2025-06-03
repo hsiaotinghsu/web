@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dual YouTube Players with Placeholder</title>
+  <style>
+    body {
+      background-color: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 20px;
+    }
+    iframe, .placeholder {
+      width: 320px;
+      height: 360px;
+      margin: 10px;
+      border: none;
+    }
+    .placeholder {
+      background-color: #000;
+    }
+  </style>
+</head>
+<body>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const topUrl = params.get('top');
+  const bottomUrl = params.get('bottom');
+
+  // Top: show video or black placeholder
+  if (topUrl) {
+    const topPlayer = document.createElement('iframe');
+    topPlayer.src = topUrl + '?autoplay=1&mute=1';
+    topPlayer.allow = 'autoplay; encrypted-media';
+    topPlayer.allowFullscreen = true;
+    document.body.appendChild(topPlayer);
+  } else {
+    const topPlaceholder = document.createElement('div');
+    topPlaceholder.className = 'placeholder';
+    document.body.appendChild(topPlaceholder);
+  }
+
+  // Bottom: only show if URL is given
+  if (bottomUrl) {
+    const bottomPlayer = document.createElement('iframe');
+    bottomPlayer.src = bottomUrl + '?autoplay=1&mute=1';
+    bottomPlayer.allow = 'autoplay; encrypted-media';
+    bottomPlayer.allowFullscreen = true;
+    document.body.appendChild(bottomPlayer);
+  }
+</script>
+
+</body>
+</html>
+
