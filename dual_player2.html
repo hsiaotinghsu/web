@@ -13,30 +13,62 @@
       margin: 0;
       padding: 20px;
     }
+
     iframe, .placeholder {
       width: 640px;
       height: 720px;
       margin: 10px;
       border: none;
     }
+
     .placeholder {
       background-color: #000;
+    }
+
+    #blackOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: black;
+      z-index: 9999;
+      display: none;
+    }
+
+    #controlBtn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      padding: 10px 20px;
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
+
+<!-- 控制按鈕 -->
+<button id="controlBtn">黑畫面 + 靜音</button>
+
+<!-- 黑遮罩 -->
+<div id="blackOverlay"></div>
 
 <script>
   const params = new URLSearchParams(window.location.search);
   const topUrl = params.get('top');
   const bottomUrl = params.get('bottom');
 
+  const topIframeId = 'topPlayer';
+  const bottomIframeId = 'bottomPlayer';
+
   // Top: show video or black placeholder
   if (topUrl) {
     const topPlayer = document.createElement('iframe');
-    topPlayer.src = topUrl + '?autoplay=1&mute=0';
+    topPlayer.src = topUrl + '?enablejsapi=1&autoplay=1&mute=0';
     topPlayer.allow = 'autoplay; encrypted-media';
     topPlayer.allowFullscreen = true;
+    topPlayer.id = topIframeId;
     document.body.appendChild(topPlayer);
   } else {
     const topPlaceholder = document.createElement('div');
@@ -47,11 +79,40 @@
   // Bottom: only show if URL is given
   if (bottomUrl) {
     const bottomPlayer = document.createElement('iframe');
-    bottomPlayer.src = bottomUrl + '?autoplay=1&mute=0';
+    bottomPlayer.src = bottomUrl + '?enablejsapi=1&autoplay=1&mute=0';
     bottomPlayer.allow = 'autoplay; encrypted-media';
     bottomPlayer.allowFullscreen = true;
+    bottomPlayer.id = bottomIframeId;
     document.body.appendChild(bottomPlayer);
   }
+
+  // 黑畫面與靜音控制
+  function muteYouTubeIframe(iframe) {
+    if (!iframe) return;
+    try {
+      iframe.contentWindow.postMessage(JSON.stringify({
+        event: 'command',
+        func: 'mute',
+        args: []
+      }), '*');
+    } catch (e) {
+      console.warn('iframe mute failed', e);
+    }
+  }
+
+  function showBlackAndMute() {
+    document.getElementById('blackOverlay').style.display = 'block';
+    muteYouTubeIframe(document.getElementById(topIframeId));
+    muteYouTubeIframe(document.getElementById(bottomIframeId));
+  }
+
+  // 若沒參數直接黑畫面
+  if (!topUrl && !bottomUrl) {
+    showBlackAndMute();
+  }
+
+  // 點按鈕也可手動觸發黑畫面與靜音
+  document.getElementById('controlBtn').addEventListener('click', showBlackAndMute);
 </script>
 
 </body>
