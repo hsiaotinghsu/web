@@ -31,12 +31,44 @@
   const topUrl = params.get('top');
   const bottomUrl = params.get('bottom');
 
-  // Top: show video or black placeholder
+  let topPlayer, bottomPlayer;
+
+  function createIframe(url, onFail) {
+    const iframe = document.createElement('iframe');
+    iframe.src = url + '?autoplay=1&mute=1&playsinline=1';
+    iframe.allow = 'autoplay; encrypted-media';
+    iframe.allowFullscreen = true;
+    iframe.setAttribute('playsinline', '');
+
+    // 若在10秒內未完成加載，視為失敗並移除
+    const timeout = setTimeout(() => {
+      console.warn(`Iframe load timeout for ${url}`);
+      iframe.remove();
+      if (onFail) onFail();
+    }, 10000); // 10秒
+
+    iframe.onload = () => {
+      clearTimeout(timeout);
+      console.log(`Iframe loaded: ${url}`);
+    };
+
+    iframe.onerror = () => {
+      console.warn(`Iframe failed: ${url}`);
+      clearTimeout(timeout);
+      iframe.remove();
+      if (onFail) onFail();
+    };
+
+    return iframe;
+  }
+
+  // Top video or placeholder
   if (topUrl) {
-    const topPlayer = document.createElement('iframe');
-    topPlayer.src = topUrl + '?autoplay=1&mute=1';
-    topPlayer.allow = 'autoplay; encrypted-media';
-    topPlayer.allowFullscreen = true;
+    topPlayer = createIframe(topUrl, () => {
+      const topPlaceholder = document.createElement('div');
+      topPlaceholder.className = 'placeholder';
+      document.body.appendChild(topPlaceholder);
+    });
     document.body.appendChild(topPlayer);
   } else {
     const topPlaceholder = document.createElement('div');
@@ -44,16 +76,16 @@
     document.body.appendChild(topPlaceholder);
   }
 
-  // Bottom: only show if URL is given
+  // Bottom video (optional)
   if (bottomUrl) {
-    const bottomPlayer = document.createElement('iframe');
-    bottomPlayer.src = bottomUrl + '?autoplay=1&mute=1';
-    bottomPlayer.allow = 'autoplay; encrypted-media';
-    bottomPlayer.allowFullscreen = true;
+    bottomPlayer = createIframe(bottomUrl, () => {
+      const bottomPlaceholder = document.createElement('div');
+      bottomPlaceholder.className = 'placeholder';
+      document.body.appendChild(bottomPlaceholder);
+    });
     document.body.appendChild(bottomPlayer);
   }
 </script>
 
 </body>
 </html>
-
