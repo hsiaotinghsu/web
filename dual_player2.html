@@ -4,18 +4,13 @@
   <meta charset="UTF-8">
   <title>Dual YouTube Players with Placeholder</title>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
+    body {
       background-color: #000;
-      width: 100%;
-      height: 100%;
-    }
-    .container {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      margin: 0;
       padding: 20px;
     }
     iframe, .placeholder {
@@ -36,37 +31,26 @@
   const topUrl = params.get('top');
   const bottomUrl = params.get('bottom');
 
-  // 如果 top 和 bottom 都沒有，顯示純黑畫面（什麼都不做）
-  if (!topUrl && !bottomUrl) {
-    // 不加入任何元素，整個 body 背景已是黑色
-    console.log("No video URLs provided, showing full black screen.");
+  // Top: show video or black placeholder
+  if (topUrl) {
+    const topPlayer = document.createElement('iframe');
+    topPlayer.src = topUrl + '?autoplay=1&mute=0';
+    topPlayer.allow = 'autoplay; encrypted-media';
+    topPlayer.allowFullscreen = true;
+    document.body.appendChild(topPlayer);
   } else {
-    // 有至少一個影片來源，建立容器顯示畫面
-    const container = document.createElement('div');
-    container.className = 'container';
-    document.body.appendChild(container);
+    const topPlaceholder = document.createElement('div');
+    topPlaceholder.className = 'placeholder';
+    document.body.appendChild(topPlaceholder);
+  }
 
-    // Top
-    if (topUrl) {
-      const topPlayer = document.createElement('iframe');
-      topPlayer.src = topUrl + '?autoplay=1&mute=1';
-      topPlayer.allow = 'autoplay; encrypted-media';
-      topPlayer.allowFullscreen = true;
-      container.appendChild(topPlayer);
-    } else {
-      const topPlaceholder = document.createElement('div');
-      topPlaceholder.className = 'placeholder';
-      container.appendChild(topPlaceholder);
-    }
-
-    // Bottom
-    if (bottomUrl) {
-      const bottomPlayer = document.createElement('iframe');
-      bottomPlayer.src = bottomUrl + '?autoplay=1&mute=1';
-      bottomPlayer.allow = 'autoplay; encrypted-media';
-      bottomPlayer.allowFullscreen = true;
-      container.appendChild(bottomPlayer);
-    }
+  // Bottom: only show if URL is given
+  if (bottomUrl) {
+    const bottomPlayer = document.createElement('iframe');
+    bottomPlayer.src = bottomUrl + '?autoplay=1&mute=0';
+    bottomPlayer.allow = 'autoplay; encrypted-media';
+    bottomPlayer.allowFullscreen = true;
+    document.body.appendChild(bottomPlayer);
   }
 </script>
 
