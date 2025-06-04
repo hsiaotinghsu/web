@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Dual YouTube Players with Placeholder and State</title>
+  <meta charset="UTF-8">
+  <title>Dual YouTube Players with Placeholder</title>
   <style>
     body {
       background-color: #000;
@@ -31,57 +31,26 @@
   const topUrl = params.get('top');
   const bottomUrl = params.get('bottom');
 
-  function clearPlayersAndState() {
-    document.querySelectorAll('iframe').forEach(el => el.remove());
-    document.querySelectorAll('.placeholder').forEach(el => el.remove());
-    localStorage.removeItem('topUrl');
-    localStorage.removeItem('bottomUrl');
-  }
-
-  if (!topUrl && !bottomUrl) {
-    clearPlayersAndState();
-
-    // 顯示兩個 placeholder（上下兩個）
+  // Top: show video or black placeholder
+  if (topUrl) {
+    const topPlayer = document.createElement('iframe');
+    topPlayer.src = topUrl + '?autoplay=1&mute=1';
+    topPlayer.allow = 'autoplay; encrypted-media';
+    topPlayer.allowFullscreen = true;
+    document.body.appendChild(topPlayer);
+  } else {
     const topPlaceholder = document.createElement('div');
     topPlaceholder.className = 'placeholder';
     document.body.appendChild(topPlaceholder);
+  }
 
-    const bottomPlaceholder = document.createElement('div');
-    bottomPlaceholder.className = 'placeholder';
-    document.body.appendChild(bottomPlaceholder);
-
-  } else {
-    if (topUrl) {
-      localStorage.setItem('topUrl', topUrl);
-    } else {
-      localStorage.removeItem('topUrl');
-    }
-
-    if (bottomUrl) {
-      localStorage.setItem('bottomUrl', bottomUrl);
-    } else {
-      localStorage.removeItem('bottomUrl');
-    }
-
-    if (topUrl) {
-      const topPlayer = document.createElement('iframe');
-      topPlayer.src = topUrl + '?autoplay=1&mute=1';
-      topPlayer.allow = 'autoplay; encrypted-media';
-      topPlayer.allowFullscreen = true;
-      document.body.appendChild(topPlayer);
-    } else {
-      const topPlaceholder = document.createElement('div');
-      topPlaceholder.className = 'placeholder';
-      document.body.appendChild(topPlaceholder);
-    }
-
-    if (bottomUrl) {
-      const bottomPlayer = document.createElement('iframe');
-      bottomPlayer.src = bottomUrl + '?autoplay=1&mute=1';
-      bottomPlayer.allow = 'autoplay; encrypted-media';
-      bottomPlayer.allowFullscreen = true;
-      document.body.appendChild(bottomPlayer);
-    }
+  // Bottom: only show if URL is given
+  if (bottomUrl) {
+    const bottomPlayer = document.createElement('iframe');
+    bottomPlayer.src = bottomUrl + '?autoplay=1&mute=1';
+    bottomPlayer.allow = 'autoplay; encrypted-media';
+    bottomPlayer.allowFullscreen = true;
+    document.body.appendChild(bottomPlayer);
   }
 </script>
 
