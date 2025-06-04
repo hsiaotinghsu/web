@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Dual YouTube Players with Placeholder</title>
+  <meta charset="UTF-8" />
+  <title>Dual YouTube Players with Placeholder and State</title>
   <style>
     body {
       background-color: #000;
@@ -31,32 +31,57 @@
   const topUrl = params.get('top');
   const bottomUrl = params.get('bottom');
 
-  // 如果網址參數中沒有 top 和 bottom，清除所有 iframe（曾經開過的）
-  if (!topUrl && !bottomUrl) {
-    const iframes = document.querySelectorAll('iframe');
-    iframes.forEach(iframe => iframe.remove());
+  function clearPlayersAndState() {
+    document.querySelectorAll('iframe').forEach(el => el.remove());
+    document.querySelectorAll('.placeholder').forEach(el => el.remove());
+    localStorage.removeItem('topUrl');
+    localStorage.removeItem('bottomUrl');
   }
 
-  // Top: show video or black placeholder
-  if (topUrl) {
-    const topPlayer = document.createElement('iframe');
-    topPlayer.src = topUrl + '?autoplay=1&mute=1';
-    topPlayer.allow = 'autoplay; encrypted-media';
-    topPlayer.allowFullscreen = true;
-    document.body.appendChild(topPlayer);
-  } else {
+  if (!topUrl && !bottomUrl) {
+    clearPlayersAndState();
+
+    // 顯示兩個 placeholder（上下兩個）
     const topPlaceholder = document.createElement('div');
     topPlaceholder.className = 'placeholder';
     document.body.appendChild(topPlaceholder);
-  }
 
-  // Bottom: only show if URL is given
-  if (bottomUrl) {
-    const bottomPlayer = document.createElement('iframe');
-    bottomPlayer.src = bottomUrl + '?autoplay=1&mute=1';
-    bottomPlayer.allow = 'autoplay; encrypted-media';
-    bottomPlayer.allowFullscreen = true;
-    document.body.appendChild(bottomPlayer);
+    const bottomPlaceholder = document.createElement('div');
+    bottomPlaceholder.className = 'placeholder';
+    document.body.appendChild(bottomPlaceholder);
+
+  } else {
+    if (topUrl) {
+      localStorage.setItem('topUrl', topUrl);
+    } else {
+      localStorage.removeItem('topUrl');
+    }
+
+    if (bottomUrl) {
+      localStorage.setItem('bottomUrl', bottomUrl);
+    } else {
+      localStorage.removeItem('bottomUrl');
+    }
+
+    if (topUrl) {
+      const topPlayer = document.createElement('iframe');
+      topPlayer.src = topUrl + '?autoplay=1&mute=1';
+      topPlayer.allow = 'autoplay; encrypted-media';
+      topPlayer.allowFullscreen = true;
+      document.body.appendChild(topPlayer);
+    } else {
+      const topPlaceholder = document.createElement('div');
+      topPlaceholder.className = 'placeholder';
+      document.body.appendChild(topPlaceholder);
+    }
+
+    if (bottomUrl) {
+      const bottomPlayer = document.createElement('iframe');
+      bottomPlayer.src = bottomUrl + '?autoplay=1&mute=1';
+      bottomPlayer.allow = 'autoplay; encrypted-media';
+      bottomPlayer.allowFullscreen = true;
+      document.body.appendChild(bottomPlayer);
+    }
   }
 </script>
 
