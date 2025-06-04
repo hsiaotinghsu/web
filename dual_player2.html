@@ -42,28 +42,23 @@
   const topUrl = params.get('top');
   const bottomUrl = params.get('bottom');
 
-  function muteYouTubeIframe(iframe) {
+  function stopAndForceClearIframe(iframe) {
     if (!iframe) return;
     try {
+      // 先下stopVideo與mute指令
+      iframe.contentWindow.postMessage(JSON.stringify({
+        event: 'command',
+        func: 'stopVideo',
+        args: []
+      }), '*');
       iframe.contentWindow.postMessage(JSON.stringify({
         event: 'command',
         func: 'mute',
         args: []
       }), '*');
-    } catch(e) {
-      console.warn('mute failed', e);
+    } catch (e) {
+      console.warn('stopVideo or mute failed', e);
     }
-  }
-
-  // 移除所有 iframe
-  function removeAllIframes() {
-    const iframes = document.querySelectorAll('iframe');
-    iframes.forEach(iframe => iframe.remove());
-  }
-
-  // 顯示黑遮罩
-  function showBlackOverlay() {
-    document.getElementById('blackOverlay').style.display = 'block';
   }
 
   if (topUrl) {
@@ -87,15 +82,24 @@
   }
 
   if (!topUrl && !bottomUrl) {
-    // 如果沒參數，先靜音所有 iframe（如果有的話）
     const iframes = document.querySelectorAll('iframe');
-    iframes.forEach(muteYouTubeIframe);
 
-    // 清除所有 iframe
-    removeAllIframes();
+    // 先停止影片並靜音
+    iframes.forEach(stopAndForceClearIframe);
 
-    // 顯示黑色遮罩
-    showBlackOverlay();
+    // 500ms後強制清空iframe src（中止載入播放）
+    setTimeout(() => {
+      iframes.forEach(iframe => {
+        iframe.src = 'about:blank';
+      });
+
+      // 再等待200ms，移除iframe並顯示黑遮罩
+      setTimeout(() => {
+        iframes.forEach(iframe => iframe.remove());
+        document.getElementById('blackOverlay').style.display = 'block';
+      }, 200);
+
+    }, 500);
   }
 </script>
 
