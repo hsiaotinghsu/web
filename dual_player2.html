@@ -39,23 +39,15 @@
     topPlayer.allowFullscreen = true;
     document.body.appendChild(topPlayer);
   } else {
-    const topPlayer = document.createElement('iframe');
-    topPlayer.src = 'https://www.youtube.com/embed/';
-    topPlayer.allow = 'autoplay; encrypted-media';
-    topPlayer.allowFullscreen = true;
-    document.body.appendChild(topPlayer);
+    const topPlaceholder = document.createElement('div');
+    topPlaceholder.className = 'placeholder';
+    document.body.appendChild(topPlaceholder);
   }
 
   // Bottom: only show if URL is given
   if (bottomUrl) {
     const bottomPlayer = document.createElement('iframe');
     bottomPlayer.src = bottomUrl + '?autoplay=1&mute=0';
-    bottomPlayer.allow = 'autoplay; encrypted-media';
-    bottomPlayer.allowFullscreen = true;
-    document.body.appendChild(bottomPlayer);
-  } else {
-    const bottomPlayer = document.createElement('iframe');
-    bottomPlayer.src = 'https://www.youtube.com/embed/';
     bottomPlayer.allow = 'autoplay; encrypted-media';
     bottomPlayer.allowFullscreen = true;
     document.body.appendChild(bottomPlayer);
