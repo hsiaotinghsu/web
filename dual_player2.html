@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Dual YouTube Players with Placeholder</title>
   <style>
     body {
@@ -12,46 +12,29 @@
       justify-content: center;
       margin: 0;
       padding: 20px;
+      position: relative;
     }
-
     iframe, .placeholder {
       width: 640px;
       height: 720px;
       margin: 10px;
       border: none;
     }
-
     .placeholder {
       background-color: #000;
     }
-
     #blackOverlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
       background-color: black;
       z-index: 9999;
       display: none;
-    }
-
-    #controlBtn {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 10000;
-      padding: 10px 20px;
-      font-size: 16px;
     }
   </style>
 </head>
 <body>
 
-<!-- 控制按鈕 -->
-<button id="controlBtn">黑畫面 + 靜音</button>
-
-<!-- 黑遮罩 -->
 <div id="blackOverlay"></div>
 
 <script>
@@ -59,34 +42,6 @@
   const topUrl = params.get('top');
   const bottomUrl = params.get('bottom');
 
-  const topIframeId = 'topPlayer';
-  const bottomIframeId = 'bottomPlayer';
-
-  // Top: show video or black placeholder
-  if (topUrl) {
-    const topPlayer = document.createElement('iframe');
-    topPlayer.src = topUrl + '?enablejsapi=1&autoplay=1&mute=0';
-    topPlayer.allow = 'autoplay; encrypted-media';
-    topPlayer.allowFullscreen = true;
-    topPlayer.id = topIframeId;
-    document.body.appendChild(topPlayer);
-  } else {
-    const topPlaceholder = document.createElement('div');
-    topPlaceholder.className = 'placeholder';
-    document.body.appendChild(topPlaceholder);
-  }
-
-  // Bottom: only show if URL is given
-  if (bottomUrl) {
-    const bottomPlayer = document.createElement('iframe');
-    bottomPlayer.src = bottomUrl + '?enablejsapi=1&autoplay=1&mute=0';
-    bottomPlayer.allow = 'autoplay; encrypted-media';
-    bottomPlayer.allowFullscreen = true;
-    bottomPlayer.id = bottomIframeId;
-    document.body.appendChild(bottomPlayer);
-  }
-
-  // 黑畫面與靜音控制
   function muteYouTubeIframe(iframe) {
     if (!iframe) return;
     try {
@@ -95,24 +50,53 @@
         func: 'mute',
         args: []
       }), '*');
-    } catch (e) {
-      console.warn('iframe mute failed', e);
+    } catch(e) {
+      console.warn('mute failed', e);
     }
   }
 
-  function showBlackAndMute() {
+  // 移除所有 iframe
+  function removeAllIframes() {
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach(iframe => iframe.remove());
+  }
+
+  // 顯示黑遮罩
+  function showBlackOverlay() {
     document.getElementById('blackOverlay').style.display = 'block';
-    muteYouTubeIframe(document.getElementById(topIframeId));
-    muteYouTubeIframe(document.getElementById(bottomIframeId));
   }
 
-  // 若沒參數直接黑畫面
+  if (topUrl) {
+    const topPlayer = document.createElement('iframe');
+    topPlayer.src = topUrl + '?enablejsapi=1&autoplay=1&mute=0';
+    topPlayer.allow = 'autoplay; encrypted-media';
+    topPlayer.allowFullscreen = true;
+    document.body.appendChild(topPlayer);
+  } else {
+    const topPlaceholder = document.createElement('div');
+    topPlaceholder.className = 'placeholder';
+    document.body.appendChild(topPlaceholder);
+  }
+
+  if (bottomUrl) {
+    const bottomPlayer = document.createElement('iframe');
+    bottomPlayer.src = bottomUrl + '?enablejsapi=1&autoplay=1&mute=0';
+    bottomPlayer.allow = 'autoplay; encrypted-media';
+    bottomPlayer.allowFullscreen = true;
+    document.body.appendChild(bottomPlayer);
+  }
+
   if (!topUrl && !bottomUrl) {
-    showBlackAndMute();
-  }
+    // 如果沒參數，先靜音所有 iframe（如果有的話）
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach(muteYouTubeIframe);
 
-  // 點按鈕也可手動觸發黑畫面與靜音
-  document.getElementById('controlBtn').addEventListener('click', showBlackAndMute);
+    // 清除所有 iframe
+    removeAllIframes();
+
+    // 顯示黑色遮罩
+    showBlackOverlay();
+  }
 </script>
 
 </body>
