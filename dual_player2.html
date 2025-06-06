@@ -1,85 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dual YouTube Players with Placeholder</title>
+  <style>
+    body {
+      background-color: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 20px;
+    }
+    iframe, .placeholder {
+      width: 640px;
+      height: 720px;
+      margin: 10px;
+      border: none;
+    }
+    .placeholder {
+      background-color: #000;
+    }
+  </style>
+</head>
 <body>
 
-<!-- 黑遮罩 -->
-<div id="blackOverlay"></div>
-
-<!-- Console Output -->
-<div id="consoleOutput" style="color: lime; font-family: monospace; white-space: pre-wrap; position: fixed; bottom: 0; left: 0; max-height: 40vh; overflow-y: auto; background: rgba(0,0,0,0.7); padding: 10px; z-index: 10001; width: 100%;"></div>
-
-
 <script>
-  // 顯示 console.log 到畫面
-  const screenConsole = document.getElementById('consoleOutput');
-  const originalLog = console.log;
-  console.log = function (...args) {
-    originalLog.apply(console, args);
-    screenConsole.textContent += args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ') + '\n';
-  };
-
   const params = new URLSearchParams(window.location.search);
   const topUrl = params.get('top');
   const bottomUrl = params.get('bottom');
 
-  const topIframeId = 'topPlayer';
-  const bottomIframeId = 'bottomPlayer';
-
-  console.log('Top URL:', topUrl);
-  console.log('Bottom URL:', bottomUrl);
-
   // Top: show video or black placeholder
   if (topUrl) {
     const topPlayer = document.createElement('iframe');
-    topPlayer.src = topUrl + '?enablejsapi=1&autoplay=1&mute=0';
+    topPlayer.src = topUrl + '?autoplay=1&mute=0';
     topPlayer.allow = 'autoplay; encrypted-media';
     topPlayer.allowFullscreen = true;
-    topPlayer.id = topIframeId;
     document.body.appendChild(topPlayer);
-    console.log('Top iframe created');
   } else {
     const topPlaceholder = document.createElement('div');
     topPlaceholder.className = 'placeholder';
     document.body.appendChild(topPlaceholder);
-    console.log('Top placeholder created');
   }
 
+  // Bottom: only show if URL is given
   if (bottomUrl) {
     const bottomPlayer = document.createElement('iframe');
-    bottomPlayer.src = bottomUrl + '?enablejsapi=1&autoplay=1&mute=0';
+    bottomPlayer.src = bottomUrl + '?autoplay=1&mute=0';
     bottomPlayer.allow = 'autoplay; encrypted-media';
     bottomPlayer.allowFullscreen = true;
-    bottomPlayer.id = bottomIframeId;
     document.body.appendChild(bottomPlayer);
-    console.log('Bottom iframe created');
   }
-
-  function muteYouTubeIframe(iframe) {
-    if (!iframe) return;
-    try {
-      iframe.contentWindow.postMessage(JSON.stringify({
-        event: 'command',
-        func: 'mute',
-        args: []
-      }), '*');
-      console.log(`Muted ${iframe.id}`);
-    } catch (e) {
-      console.warn('iframe mute failed', e);
-      console.log('iframe mute failed', e);
-    }
-  }
-
-  function showBlackAndMute() {
-    document.getElementById('blackOverlay').style.display = 'block';
-    muteYouTubeIframe(document.getElementById(topIframeId));
-    muteYouTubeIframe(document.getElementById(bottomIframeId));
-    console.log('Black overlay shown and iframes muted');
-  }
-
-  if (!topUrl && !bottomUrl) {
-    console.log('No URLs provided, showing black overlay');
-    showBlackAndMute();
-  }
-
-  
 </script>
 
 </body>
+</html>
